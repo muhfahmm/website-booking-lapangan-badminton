@@ -1,0 +1,9 @@
+# PHP & web project ignore patterns
+/vendor/
+node_modules/
+.env
+*.log
+.DS_Store
+.idea/
+*.zip
+*.tar.gz
