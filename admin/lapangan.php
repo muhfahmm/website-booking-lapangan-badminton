@@ -36,14 +36,22 @@ if ($action == 'add' || $action == 'edit') {
     $lapangan = [
         'id' => '',
         'name' => '',
+        'location' => '',
+        'price_weekday' => '',
+        'price_weekend' => '',
+        'status' => 'tersedia',
         'description' => '',
-        'price_per_hour' => '',
+        'size' => '',
+        'lighting' => '',
+        'parking' => '',
+        'floor_type' => '',
+        'facilities' => '',
         'image_url' => ''
     ];
 
     if ($action == 'edit' && $lapangan_id) {
         try {
-            $stmt = $pdo->prepare('SELECT * FROM tb_court WHERE id = ?');
+            $stmt = $pdo->prepare('SELECT id, name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url FROM tb_court WHERE id = ?');
             $stmt->execute([$lapangan_id]);
             $lapangan = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -53,21 +61,44 @@ if ($action == 'add' || $action == 'edit') {
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $name = trim($_POST['name'] ?? '');
+        $location = trim($_POST['location'] ?? '');
+        $price_weekday = trim($_POST['price_weekday'] ?? '');
+        $price_weekend = trim($_POST['price_weekend'] ?? '');
+        $status = trim($_POST['status'] ?? 'tersedia');
         $description = trim($_POST['description'] ?? '');
-        $price_per_hour = trim($_POST['price_per_hour'] ?? '');
+        $size = trim($_POST['size'] ?? '');
+        $lighting = trim($_POST['lighting'] ?? '');
+        $parking = trim($_POST['parking'] ?? '');
+        $floor_type = trim($_POST['floor_type'] ?? '');
+        $facilities = trim($_POST['facilities'] ?? '');
         $image_url = trim($_POST['image_url'] ?? '');
 
-        if (empty($name) || empty($price_per_hour)) {
-            $error = 'Nama dan harga lapangan harus diisi!';
+        if (empty($name) || empty($price_weekday) || empty($price_weekend)) {
+            $error = 'Nama, harga weekday, dan harga weekend harus diisi!';
         } else {
             try {
                 if ($action == 'add') {
-                    $stmt = $pdo->prepare('INSERT INTO tb_court (name, description, price_per_hour, image_url) VALUES (?, ?, ?, ?)');
-                    $stmt->execute([$name, $description, $price_per_hour, $image_url]);
+                    $stmt = $pdo->prepare('
+                        INSERT INTO tb_court 
+                        (name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ');
+                    $stmt->execute([
+                        $name, $location, $price_weekday, $price_weekend, $status, $description, 
+                        $size, $lighting, $parking, $floor_type, $facilities, $image_url
+                    ]);
                     $success = 'Data lapangan berhasil ditambahkan!';
                 } else {
-                    $stmt = $pdo->prepare('UPDATE tb_court SET name = ?, description = ?, price_per_hour = ?, image_url = ? WHERE id = ?');
-                    $stmt->execute([$name, $description, $price_per_hour, $image_url, $lapangan_id]);
+                    $stmt = $pdo->prepare('
+                        UPDATE tb_court 
+                        SET name = ?, location = ?, price_weekday = ?, price_weekend = ?, status = ?, 
+                            description = ?, size = ?, lighting = ?, parking = ?, floor_type = ?, facilities = ?, image_url = ? 
+                        WHERE id = ?
+                    ');
+                    $stmt->execute([
+                        $name, $location, $price_weekday, $price_weekend, $status, $description, 
+                        $size, $lighting, $parking, $floor_type, $facilities, $image_url, $lapangan_id
+                    ]);
                     $success = 'Data lapangan berhasil diupdate!';
                 }
                 $_POST = [];
@@ -113,6 +144,61 @@ if ($action == 'add' || $action == 'edit') {
                 >
             </div>
 
+            <!-- Lokasi -->
+            <div class="mb-6">
+                <label class="block text-slate-700 font-semibold mb-2">Lokasi</label>
+                <input 
+                    type="text" 
+                    name="location" 
+                    value="<?php echo htmlspecialchars($lapangan['location'] ?? $_POST['location'] ?? ''); ?>"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                    placeholder="Jakarta, Bandung, dll"
+                >
+            </div>
+
+            <!-- Harga Weekday & Weekend -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-slate-700 font-semibold mb-2">Harga Weekday (Rp) <span class="text-rose-600">*</span></label>
+                    <input 
+                        type="number" 
+                        name="price_weekday" 
+                        required 
+                        min="0"
+                        step="1000"
+                        value="<?php echo htmlspecialchars($lapangan['price_weekday'] ?? $_POST['price_weekday'] ?? ''); ?>"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                        placeholder="50000"
+                    >
+                </div>
+                <div>
+                    <label class="block text-slate-700 font-semibold mb-2">Harga Weekend (Rp) <span class="text-rose-600">*</span></label>
+                    <input 
+                        type="number" 
+                        name="price_weekend" 
+                        required 
+                        min="0"
+                        step="1000"
+                        value="<?php echo htmlspecialchars($lapangan['price_weekend'] ?? $_POST['price_weekend'] ?? ''); ?>"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                        placeholder="75000"
+                    >
+                </div>
+            </div>
+
+            <!-- Status -->
+            <div class="mb-6">
+                <label class="block text-slate-700 font-semibold mb-2">Status</label>
+                <select 
+                    name="status" 
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                >
+                    <option value="tersedia" <?php echo ($lapangan['status'] ?? $_POST['status'] ?? 'tersedia') == 'tersedia' ? 'selected' : ''; ?>>Tersedia</option>
+                    <option value="maintenance" <?php echo ($lapangan['status'] ?? $_POST['status'] ?? '') == 'maintenance' ? 'selected' : ''; ?>>Maintenance</option>
+                    <option value="booking" <?php echo ($lapangan['status'] ?? $_POST['status'] ?? '') == 'booking' ? 'selected' : ''; ?>>Booking</option>
+                </select>
+            </div>
+
             <!-- Deskripsi -->
             <div class="mb-6">
                 <label class="block text-slate-700 font-semibold mb-2">Deskripsi</label>
@@ -124,24 +210,65 @@ if ($action == 'add' || $action == 'edit') {
                 ><?php echo htmlspecialchars($lapangan['description'] ?? $_POST['description'] ?? ''); ?></textarea>
             </div>
 
-            <!-- Harga per jam -->
-            <div class="mb-6">
-                <label class="block text-slate-700 font-semibold mb-2">Harga per Jam (Rp) <span class="text-rose-600">*</span></label>
-                <input 
-                    type="number" 
-                    name="price_per_hour" 
-                    required 
-                    min="0"
-                    step="1000"
-                    value="<?php echo htmlspecialchars($lapangan['price_per_hour'] ?? $_POST['price_per_hour'] ?? ''); ?>"
-                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
-                    placeholder="50000"
-                >
+            <!-- Grid Ukuran, Pencahayaan, Parkir, Tipe Lantai -->
+            <div class="grid grid-cols-2 gap-4 mb-6">
+                <div>
+                    <label class="block text-slate-700 font-semibold mb-2">Ukuran</label>
+                    <input 
+                        type="text" 
+                        name="size" 
+                        value="<?php echo htmlspecialchars($lapangan['size'] ?? $_POST['size'] ?? ''); ?>"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                        placeholder="17m x 8.5m"
+                    >
+                </div>
+                <div>
+                    <label class="block text-slate-700 font-semibold mb-2">Pencahayaan</label>
+                    <input 
+                        type="text" 
+                        name="lighting" 
+                        value="<?php echo htmlspecialchars($lapangan['lighting'] ?? $_POST['lighting'] ?? ''); ?>"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                        placeholder="LED Standard"
+                    >
+                </div>
+                <div>
+                    <label class="block text-slate-700 font-semibold mb-2">Parkir</label>
+                    <input 
+                        type="text" 
+                        name="parking" 
+                        value="<?php echo htmlspecialchars($lapangan['parking'] ?? $_POST['parking'] ?? ''); ?>"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                        placeholder="Tersedia (50+ spot)"
+                    >
+                </div>
+                <div>
+                    <label class="block text-slate-700 font-semibold mb-2">Tipe Lantai</label>
+                    <input 
+                        type="text" 
+                        name="floor_type" 
+                        value="<?php echo htmlspecialchars($lapangan['floor_type'] ?? $_POST['floor_type'] ?? ''); ?>"
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                        placeholder="Vinyl/PVC, Maple, Rubber"
+                    >
+                </div>
             </div>
 
-            <!-- URL Gambar -->
+            <!-- Fasilitas (Comma-separated) -->
+            <div class="mb-6">
+                <label class="block text-slate-700 font-semibold mb-2">Fasilitas (pisahkan dengan koma)</label>
+                <textarea 
+                    name="facilities" 
+                    rows="3"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition font-mono text-sm"
+                    placeholder="AC, Toilet, Kamar Ganti, Penyewaan Perlengkapan, Kantin, WiFi"
+                ><?php echo htmlspecialchars($lapangan['facilities'] ?? $_POST['facilities'] ?? ''); ?></textarea>
+                <p class="text-slate-500 text-xs mt-1">Contoh: AC, Toilet, Kamar Ganti, Penyewaan Perlengkapan</p>
+            </div>
+
+            <!-- URL Gambar Utama -->
             <div class="mb-8">
-                <label class="block text-slate-700 font-semibold mb-2">URL Gambar</label>
+                <label class="block text-slate-700 font-semibold mb-2">URL Gambar Utama</label>
                 <input 
                     type="url" 
                     name="image_url" 
@@ -149,6 +276,7 @@ if ($action == 'add' || $action == 'edit') {
                     class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
                     placeholder="https://example.com/image.jpg"
                 >
+                <p class="text-slate-500 text-xs mt-1">Gallery images dapat diupload di halaman terpisah (coming soon)</p>
             </div>
 
             <!-- Buttons -->
@@ -173,7 +301,7 @@ if ($action == 'add' || $action == 'edit') {
 } else {
     // Display list of lapangan
     try {
-        $stmt = $pdo->query('SELECT * FROM tb_court ORDER BY created_at DESC');
+        $stmt = $pdo->query('SELECT id, name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url, created_at FROM tb_court ORDER BY created_at DESC');
         $lapangan_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         $error = 'Error: ' . $e->getMessage();
@@ -221,10 +349,29 @@ if ($action == 'add' || $action == 'edit') {
                             <p class="text-slate-600 text-sm mb-4 line-clamp-2"><?php echo htmlspecialchars($court['description']); ?></p>
                         <?php endif; ?>
 
+                        <!-- Price Info -->
                         <div class="mb-4 pb-4 border-b border-slate-200">
                             <p class="text-emerald-600 font-bold text-lg">
-                                Rp <?php echo number_format($court['price_per_hour'], 0, ',', '.'); ?> / jam
+                                Rp <?php echo number_format($court['price_weekday'], 0, ',', '.'); ?> 
+                                <span class="text-slate-500 font-normal text-sm">/ jam (Weekday)</span>
                             </p>
+                            <p class="text-yellow-600 font-bold text-lg">
+                                Rp <?php echo number_format($court['price_weekend'], 0, ',', '.'); ?> 
+                                <span class="text-slate-500 font-normal text-sm">/ jam (Weekend)</span>
+                            </p>
+                        </div>
+
+                        <!-- Spec Info -->
+                        <div class="mb-4 pb-4 border-b border-slate-200 text-xs text-slate-600 space-y-1">
+                            <?php if ($court['size']): ?>
+                                <p><i class="fas fa-ruler text-emerald-600 mr-2"></i><?php echo htmlspecialchars($court['size']); ?></p>
+                            <?php endif; ?>
+                            <?php if ($court['lighting']): ?>
+                                <p><i class="fas fa-lightbulb text-yellow-400 mr-2"></i><?php echo htmlspecialchars($court['lighting']); ?></p>
+                            <?php endif; ?>
+                            <?php if ($court['parking']): ?>
+                                <p><i class="fas fa-parking text-blue-600 mr-2"></i><?php echo htmlspecialchars($court['parking']); ?></p>
+                            <?php endif; ?>
                         </div>
 
                         <!-- Actions -->

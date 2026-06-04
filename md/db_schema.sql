@@ -24,10 +24,19 @@ CREATE TABLE IF NOT EXISTS tb_user (
 CREATE TABLE IF NOT EXISTS tb_court (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
+    location VARCHAR(150) DEFAULT 'Jakarta',
+    price_weekday INT DEFAULT 0,
+    price_weekend INT DEFAULT 0,
+    status ENUM('tersedia', 'maintenance', 'booking') DEFAULT 'tersedia',
     description TEXT,
-    price_per_hour DECIMAL(10,2) NOT NULL,
+    size VARCHAR(50) DEFAULT '17m x 8.5m',
+    lighting VARCHAR(100) DEFAULT 'LED Standard',
+    parking VARCHAR(100) DEFAULT 'Tersedia',
+    floor_type VARCHAR(100) DEFAULT 'Vinyl/PVC',
+    facilities TEXT,
     image_url VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Table: tb_booking (court reservations)
@@ -40,6 +49,16 @@ CREATE TABLE IF NOT EXISTS tb_booking (
     status ENUM('pending','confirmed','cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES tb_user(id) ON DELETE CASCADE,
+    FOREIGN KEY (court_id) REFERENCES tb_court(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Table: tb_court_gallery (court images gallery)
+CREATE TABLE IF NOT EXISTS tb_court_gallery (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    court_id INT NOT NULL,
+    image_url VARCHAR(255) NOT NULL,
+    image_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (court_id) REFERENCES tb_court(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
