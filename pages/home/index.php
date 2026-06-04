@@ -50,56 +50,88 @@
         <div class="max-w-7xl mx-auto px-4">
             <h3 class="text-4xl font-bold text-center mb-12">Lapangan Unggulan</h3>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Court Card 1 -->
-                <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden">
-                    <div class="h-48 bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                        <i class="fas fa-badminton text-white text-6xl opacity-50"></i>
-                    </div>
-                    <div class="p-6">
-                        <h4 class="text-xl font-bold text-slate-900 mb-2">Lapangan Premium A</h4>
-                        <p class="text-slate-600 text-sm mb-4">Lapangan indoor dengan pencahayaan LED terbaik</p>
-                        <div class="mb-4 pb-4 border-b border-slate-200">
-                            <p class="text-emerald-600 font-bold text-lg">Rp 50.000 / jam</p>
-                        </div>
-                        <a href="../../pages/booking/index.php" class="inline-block bg-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">
-                            <i class="fas fa-calendar mr-1"></i> Booking
-                        </a>
-                    </div>
-                </div>
+                <?php
+                // Include database connection
+                require_once '../../config/database.php';
 
-                <!-- Court Card 2 -->
-                <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden">
-                    <div class="h-48 bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                        <i class="fas fa-badminton text-white text-6xl opacity-50"></i>
-                    </div>
-                    <div class="p-6">
-                        <h4 class="text-xl font-bold text-slate-900 mb-2">Lapangan Standar B</h4>
-                        <p class="text-slate-600 text-sm mb-4">Lapangan dengan fasilitas lengkap dan nyaman</p>
-                        <div class="mb-4 pb-4 border-b border-slate-200">
-                            <p class="text-emerald-600 font-bold text-lg">Rp 40.000 / jam</p>
-                        </div>
-                        <a href="../../pages/booking/index.php" class="inline-block bg-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">
-                            <i class="fas fa-calendar mr-1"></i> Booking
-                        </a>
-                    </div>
-                </div>
+                try {
+                    // Query lapangan dengan status tersedia, limit 3
+                    $query = "SELECT id, name, location, price_weekday, price_weekend, 
+                              description, image_url, status FROM tb_court 
+                              WHERE status = 'tersedia' 
+                              LIMIT 3";
+                    
+                    $stmt = $pdo->prepare($query);
+                    $stmt->execute();
+                    $courts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-                <!-- Court Card 3 -->
+                    // Jika data kosong, tampilkan sample data
+                    if (empty($courts)) {
+                        $courts = [
+                            [
+                                'id' => 1,
+                                'name' => 'Lapangan Premium A',
+                                'location' => 'Jl. Utama No. 1',
+                                'price_weekday' => 50000,
+                                'price_weekend' => 70000,
+                                'description' => 'Lapangan indoor dengan pencahayaan LED terbaik',
+                                'image_url' => 'https://via.placeholder.com/400x250/059669/FACC15?text=Premium+A',
+                                'status' => 'tersedia'
+                            ],
+                            [
+                                'id' => 2,
+                                'name' => 'Lapangan Standar B',
+                                'location' => 'Jl. Sudirman No. 45',
+                                'price_weekday' => 40000,
+                                'price_weekend' => 60000,
+                                'description' => 'Lapangan dengan fasilitas lengkap dan nyaman',
+                                'image_url' => 'https://via.placeholder.com/400x250/059669/FACC15?text=Standar+B',
+                                'status' => 'tersedia'
+                            ],
+                            [
+                                'id' => 3,
+                                'name' => 'Lapangan Ekonomis C',
+                                'location' => 'Jl. Gatot Subroto No. 89',
+                                'price_weekday' => 30000,
+                                'price_weekend' => 50000,
+                                'description' => 'Lapangan terjangkau dengan kualitas terjamin',
+                                'image_url' => 'https://via.placeholder.com/400x250/059669/FACC15?text=Ekonomis+C',
+                                'status' => 'tersedia'
+                            ]
+                        ];
+                    }
+
+                    foreach($courts as $court):
+                ?>
+                <!-- Court Card -->
                 <div class="bg-white rounded-2xl shadow-md hover:shadow-xl transition overflow-hidden">
-                    <div class="h-48 bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center">
-                        <i class="fas fa-badminton text-white text-6xl opacity-50"></i>
+                    <div class="h-48 bg-gradient-to-br from-emerald-500 to-emerald-600 flex items-center justify-center overflow-hidden">
+                        <?php if (!empty($court['image_url'])): ?>
+                            <img src="<?php echo htmlspecialchars($court['image_url']); ?>" alt="<?php echo htmlspecialchars($court['name']); ?>" class="w-full h-full object-cover">
+                        <?php else: ?>
+                            <i class="fas fa-badminton text-white text-6xl opacity-50"></i>
+                        <?php endif; ?>
                     </div>
                     <div class="p-6">
-                        <h4 class="text-xl font-bold text-slate-900 mb-2">Lapangan Ekonomis C</h4>
-                        <p class="text-slate-600 text-sm mb-4">Lapangan terjangkau dengan kualitas terjamin</p>
+                        <h4 class="text-xl font-bold text-slate-900 mb-2"><?php echo htmlspecialchars($court['name']); ?></h4>
+                        <p class="text-slate-600 text-sm mb-4"><?php echo htmlspecialchars($court['description']); ?></p>
                         <div class="mb-4 pb-4 border-b border-slate-200">
-                            <p class="text-emerald-600 font-bold text-lg">Rp 30.000 / jam</p>
+                            <p class="text-emerald-600 font-bold text-lg">Rp <?php echo number_format($court['price_weekday'], 0, ',', '.'); ?> / jam</p>
                         </div>
-                        <a href="../../pages/booking/index.php" class="inline-block bg-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">
+                        <a href="../../pages/page.php?page=booking" class="inline-block bg-yellow-400 text-slate-900 font-semibold px-4 py-2 rounded-lg hover:bg-yellow-500">
                             <i class="fas fa-calendar mr-1"></i> Booking
                         </a>
                     </div>
                 </div>
+                <?php 
+                    endforeach;
+
+                } catch (PDOException $e) {
+                    echo '<div class="col-span-3 bg-red-50 border-l-4 border-red-500 p-4 rounded">';
+                    echo '<p class="text-red-700"><strong>Database Error:</strong> ' . htmlspecialchars($e->getMessage()) . '</p>';
+                    echo '</div>';
+                }
+                ?>
             </div>
         </div>
     </section>
