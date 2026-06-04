@@ -40,7 +40,7 @@ try {
     // Recent bookings
     $stmt = $pdo->query("
         SELECT tb_booking.id, tb_user.name, tb_court.name as court_name, 
-               tb_booking.start_time, tb_booking.status, tb_court.price_per_hour
+               tb_booking.start_time, tb_booking.status, tb_court.price_weekday
         FROM tb_booking
         JOIN tb_user ON tb_booking.user_id = tb_user.id
         JOIN tb_court ON tb_booking.court_id = tb_court.id
@@ -149,7 +149,7 @@ include 'templates/header.php';
                                 <?php echo date('d M Y H:i', strtotime($booking['start_time'])); ?>
                             </td>
                             <td class="px-4 py-3 text-slate-900 font-semibold">
-                                Rp <?php echo number_format($booking['price_per_hour'], 0, ',', '.'); ?>
+                                Rp <?php echo number_format($booking['price_weekday'], 0, ',', '.'); ?> (Weekday)
                             </td>
                             <td class="px-4 py-3">
                                 <?php

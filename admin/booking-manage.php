@@ -41,7 +41,7 @@ try {
     $query = '
         SELECT tb_booking.id, tb_booking.status, tb_booking.start_time, tb_booking.end_time,
                tb_user.name as user_name, tb_user.email, tb_user.phone,
-               tb_court.name as court_name, tb_court.price_per_hour,
+               tb_court.name as court_name, tb_court.price_weekday,
                tb_booking.created_at
         FROM tb_booking
         JOIN tb_user ON tb_booking.user_id = tb_user.id
@@ -141,7 +141,7 @@ include 'templates/header.php';
                             </td>
                             <td class="px-6 py-4">
                                 <p class="font-bold text-slate-900">
-                                    Rp <?php echo number_format($booking['price_per_hour'], 0, ',', '.'); ?>
+                                    Rp <?php echo number_format($booking['price_weekday'], 0, ',', '.'); ?> (Weekday)
                                 </p>
                                 <p class="text-slate-500 text-xs">Dibuat: <?php echo date('d M Y H:i', strtotime($booking['created_at'])); ?></p>
                             </td>
