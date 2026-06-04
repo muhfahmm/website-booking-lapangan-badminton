@@ -10,26 +10,37 @@ if (isset($_SESSION['admin_id'])) {
 require_once '../config/database.php';
 
 $error = '';
+$success = '';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
+    $confirm_password = trim($_POST['confirm_password'] ?? '');
 
-    if (empty($username) || empty($password)) {
-        $error = 'Username dan password harus diisi!';
+    // Validation
+    if (empty($username) || empty($password) || empty($confirm_password)) {
+        $error = 'Semua field harus diisi!';
+    } elseif (strlen($username) < 3) {
+        $error = 'Username minimal 3 karakter!';
+    } elseif ($password !== $confirm_password) {
+        $error = 'Password dan konfirmasi password tidak cocok!';
     } else {
         try {
-            $stmt = $pdo->prepare('SELECT id, username, password FROM tb_admin WHERE username = ?');
+            // Check if username already exists
+            $stmt = $pdo->prepare('SELECT id FROM tb_admin WHERE username = ?');
             $stmt->execute([$username]);
-            $admin = $stmt->fetch(PDO::FETCH_ASSOC);
-
-            if ($admin && password_verify($password, $admin['password'])) {
-                $_SESSION['admin_id'] = $admin['id'];
-                $_SESSION['admin_username'] = $admin['username'];
-                header('Location: dashboard.php');
-                exit;
+            
+            if ($stmt->fetch()) {
+                $error = 'Username sudah terdaftar!';
             } else {
-                $error = 'Username atau password salah!';
+                // Hash password and insert
+                $hashed_password = password_hash($password, PASSWORD_DEFAULT);
+                $stmt = $pdo->prepare('INSERT INTO tb_admin (username, password) VALUES (?, ?)');
+                $stmt->execute([$username, $hashed_password]);
+                
+                $success = 'Akun berhasil dibuat! Silahkan login.';
+                // Clear form
+                $_POST = [];
             }
         } catch (PDOException $e) {
             $error = 'Error: ' . $e->getMessage();
@@ -42,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Login - Booking Lapangan Badminton</title>
+    <title>Admin Register - Booking Lapangan Badminton</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
@@ -59,15 +70,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-white mb-2">Admin Panel</h1>
+            <h1 class="text-3xl font-bold text-white mb-2">Daftar Admin</h1>
             <p class="text-emerald-200">Booking Lapangan Badminton</p>
         </div>
 
-        <!-- Login Card -->
+        <!-- Register Card -->
         <div class="bg-white rounded-2xl shadow-2xl p-8">
             <?php if ($error): ?>
                 <div class="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-lg">
                     <p class="text-rose-700 text-sm"><?php echo htmlspecialchars($error); ?></p>
+                </div>
+            <?php endif; ?>
+
+            <?php if ($success): ?>
+                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-200 rounded-lg">
+                    <p class="text-emerald-700 text-sm"><?php echo htmlspecialchars($success); ?></p>
+                    <p class="text-emerald-600 text-xs mt-2">
+                        <a href="login.php" class="font-semibold hover:text-emerald-800">Klik di sini untuk login</a>
+                    </p>
                 </div>
             <?php endif; ?>
 
@@ -79,13 +99,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         type="text" 
                         name="username" 
                         required 
+                        value="<?php echo htmlspecialchars($_POST['username'] ?? ''); ?>"
                         class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
-                        placeholder="Masukkan username"
+                        placeholder="Minimal 3 karakter"
                     >
                 </div>
 
                 <!-- Password Input -->
-                <div class="mb-8">
+                <div class="mb-6">
                     <label class="block text-slate-700 font-semibold mb-2">Password</label>
                     <input 
                         type="password" 
@@ -96,21 +117,33 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     >
                 </div>
 
-                <!-- Login Button -->
+                <!-- Confirm Password Input -->
+                <div class="mb-8">
+                    <label class="block text-slate-700 font-semibold mb-2">Konfirmasi Password</label>
+                    <input 
+                        type="password" 
+                        name="confirm_password" 
+                        required 
+                        class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
+                        placeholder="Ulangi password"
+                    >
+                </div>
+
+                <!-- Register Button -->
                 <button 
                     type="submit" 
                     class="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold py-3 rounded-lg transition duration-300 transform hover:scale-105"
                 >
-                    Login
+                    Daftar
                 </button>
             </form>
 
-            <!-- Register Link -->
+            <!-- Login Link -->
             <div class="mt-6 text-center">
                 <p class="text-slate-600">
-                    Belum punya akun? 
-                    <a href="register.php" class="text-emerald-600 font-semibold hover:text-emerald-700">
-                        Daftar di sini
+                    Sudah punya akun? 
+                    <a href="login.php" class="text-emerald-600 font-semibold hover:text-emerald-700">
+                        Login di sini
                     </a>
                 </p>
             </div>
