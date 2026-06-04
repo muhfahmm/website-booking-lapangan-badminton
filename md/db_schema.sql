@@ -80,3 +80,24 @@ CREATE TABLE IF NOT EXISTS tb_setting (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- End of schema
+
+-- ============================================================================
+-- MIGRATION REFERENCE (For upgrading existing v1.0 database to v2.0)
+-- ============================================================================
+-- If you have existing data and need to update table structure, run these:
+-- 
+-- ALTER TABLE tb_court MODIFY COLUMN name VARCHAR(100) NOT NULL;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS location VARCHAR(150) DEFAULT 'Jakarta' AFTER name;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS price_weekday INT DEFAULT 0 AFTER location;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS price_weekend INT DEFAULT 0 AFTER price_weekday;
+-- ALTER TABLE tb_court MODIFY COLUMN description TEXT;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS size VARCHAR(50) DEFAULT '17m x 8.5m' AFTER description;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS lighting VARCHAR(100) DEFAULT 'LED Standard' AFTER size;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS parking VARCHAR(100) DEFAULT 'Tersedia' AFTER lighting;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS floor_type VARCHAR(100) DEFAULT 'Vinyl/PVC' AFTER parking;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS facilities TEXT AFTER floor_type;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS status ENUM('tersedia', 'maintenance', 'booking') DEFAULT 'tersedia' AFTER facilities;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at;
+-- ALTER TABLE tb_court DROP COLUMN IF EXISTS price_per_hour;
+--
+-- ============================================================================

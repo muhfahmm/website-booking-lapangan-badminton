@@ -84,8 +84,8 @@ mysql -u root -p < md/db_schema.sql
 # Backup existing database (IMPORTANT!)
 mysqldump -u root -p db_booking_lapangan_badminton > backup.sql
 
-# Run migration
-mysql -u root -p db_booking_lapangan_badminton < md/migrate.sql
+# Migration commands tersedia di akhir file db_schema.sql
+# Uncomment dan jalankan ALTER commands sesuai kebutuhan
 ```
 
 ### Step 3: Konfigurasi Database

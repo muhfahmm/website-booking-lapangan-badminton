@@ -8,17 +8,16 @@ Panduan lengkap untuk menggunakan file-file SQL di project ini dengan benar.
 
 | File | Purpose | Type | Use Case |
 |------|---------|------|----------|
-| `db_schema.sql` | **Complete database schema** | Full setup | Fresh installation |
-| `migrate.sql` | **Database upgrade script** | Incremental changes | Upgrade from v1.0 → v2.0 |
+| `db_schema.sql` | **Complete database schema + migration reference** | Full setup | Fresh installation & upgrade guide |
 | `reset.sql` | **Database cleanup** | Destructive | Development/testing |
 
 ---
 
 ## 🎯 Detailed File Descriptions
 
-### 1️⃣ **db_schema.sql** - Fresh Database Setup
+### 1️⃣ **db_schema.sql** - Fresh Database Setup + Migration Reference
 
-**Fungsi:** Membuat database dan semua tabel dari awal
+**Fungsi:** Membuat database dan semua tabel dari awal, plus berisi migration commands untuk upgrade
 
 **Konten:**
 ```sql
@@ -32,13 +31,20 @@ CREATE TABLE tb_booking (...)
 CREATE TABLE tb_court_gallery (...)
 CREATE TABLE tb_content (...)
 CREATE TABLE tb_setting (...)
+
+-- End of schema
+
+-- MIGRATION REFERENCE (Commented out for safety)
+-- ALTER TABLE tb_court ADD COLUMN location ...
+-- ALTER TABLE tb_court ADD COLUMN price_weekday ...
+-- ... (etc)
 ```
 
 **Kapan Digunakan:**
 - ✅ Setup pertama kali (fresh installation)
 - ✅ Development environment baru
 - ✅ Staging/production initial setup
-- ✅ Testing di database bersih
+- ✅ Reference untuk migration commands
 
 **Cara Menggunakan:**
 ```bash
@@ -58,69 +64,11 @@ mysql> SOURCE /path/to/db_schema.sql;
 - Existing database TIDAK akan di-drop
 - Jika database sudah ada, tabel tidak akan dibuat ulang
 - Safe untuk dijalankan berkali-kali
+- Migration commands di akhir file hanya untuk reference (commented out)
 
 ---
 
-### 2️⃣ **migrate.sql** - Upgrade Existing Database
-
-**Fungsi:** Upgrade database existing dari v1.0 ke v2.0
-
-**Konten:**
-```sql
--- ALTER TABLE commands untuk update struktur
-ALTER TABLE tb_court ADD COLUMN location ...
-ALTER TABLE tb_court ADD COLUMN price_weekday ...
-ALTER TABLE tb_court ADD COLUMN price_weekend ...
-ALTER TABLE tb_court ADD COLUMN status ...
-ALTER TABLE tb_court ADD COLUMN size ...
-ALTER TABLE tb_court ADD COLUMN lighting ...
-ALTER TABLE tb_court ADD COLUMN parking ...
-ALTER TABLE tb_court ADD COLUMN floor_type ...
-ALTER TABLE tb_court ADD COLUMN facilities ...
-ALTER TABLE tb_court ADD COLUMN updated_at ...
-
-ALTER TABLE tb_court DROP COLUMN IF EXISTS price_per_hour;
-```
-
-**Kapan Digunakan:**
-- ✅ Upgrade dari v1.0 ke v2.0
-- ✅ Preserve existing data
-- ✅ Add new columns tanpa menghapus data lama
-- ✅ Production environment dengan existing data
-
-**Cara Menggunakan:**
-```bash
-# Upgrade existing database
-mysql -u root -p db_booking_lapangan_badminton < md/migrate.sql
-
-# Atau dari MySQL CLI
-mysql> USE db_booking_lapangan_badminton;
-mysql> SOURCE /path/to/migrate.sql;
-```
-
-**Hasil:**
-- Kolom baru ditambahkan ke tb_court
-- Default value diisi untuk kolom baru
-- Existing data tetap intact
-- Old price_per_hour column dihapus (jika ada)
-
-**Important:**
-- ⚠️ ALTER TABLE bisa slow pada tabel besar
-- ✅ IF EXISTS prevent error jika kolom sudah ada
-- ✅ CASCADE delete tidak terpengaruh
-
-**Jika Error:**
-```
-Error: Duplicate column name 'location'
-→ Kolom sudah ada, lanjut ke error berikutnya
-
-Error: Can't DROP 'price_per_hour'; check that column/key exists
-→ Column sudah dihapus, aman diabaikan
-```
-
----
-
-### 3️⃣ **reset.sql** - Database Cleanup
+### 2️⃣ **reset.sql** - Database Cleanup
 
 **Fungsi:** Membersihkan database (untuk development)
 
@@ -180,16 +128,23 @@ mysql -u root -p < md/db_schema.sql
 # 1. Backup existing database (IMPORTANT!)
 mysqldump -u root -p db_booking_lapangan_badminton > backup.sql
 
-# 2. Run migration
-mysql -u root -p db_booking_lapangan_badminton < md/migrate.sql
+# 2. Check db_schema.sql for migration commands at the end
+# Open file and uncomment/copy the ALTER commands you need
 
-# 3. Verify data
+# 3. Run migration commands in MySQL:
+mysql -u root -p
+> USE db_booking_lapangan_badminton;
+> ALTER TABLE tb_court ADD COLUMN location VARCHAR(150) DEFAULT 'Jakarta' AFTER name;
+> ALTER TABLE tb_court ADD COLUMN price_weekday INT DEFAULT 0 AFTER location;
+> -- ... (copy remaining ALTER commands from db_schema.sql)
+
+# 4. Verify data
 mysql -u root -p
 > USE db_booking_lapangan_badminton;
 > SELECT COUNT(*) FROM tb_court;
 > DESCRIBE tb_court;
 
-# 4. Done! Database upgraded
+# 5. Done! Database upgraded
 ```
 
 ---
@@ -341,8 +296,7 @@ Error: Cannot add foreign key constraint
 
 | File | Size | Est. Time |
 |------|------|-----------|
-| `db_schema.sql` | ~3 KB | < 1 detik |
-| `migrate.sql` | ~1 KB | 1-5 detik (tergantung data) |
+| `db_schema.sql` | ~5 KB | < 1 detik |
 | `reset.sql` | ~1 KB | 1-2 detik |
 
 ---
@@ -369,7 +323,7 @@ grep "INSERT INTO tb_court" tb_court_backup.sql | wc -l
 | Kebutuhan | File | Command |
 |-----------|------|---------|
 | Setup baru | db_schema.sql | `mysql -u root -p < db_schema.sql` |
-| Upgrade existing | migrate.sql | `mysql -u root -p db < migrate.sql` |
+| Upgrade existing | db_schema.sql (see end) | Copy & run ALTER commands from file |
 | Dev reset | reset.sql | `mysql -u root -p < reset.sql` |
 
 ---
