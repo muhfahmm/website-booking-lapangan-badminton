@@ -141,11 +141,18 @@ mysql -u root -p < md/db_schema.sql
 mysql -u root -p db_booking_lapangan_badminton < md/migrate.sql
 ```
 
+**File Differences:**
+
+| File | Konten | Use Case |
+|------|--------|----------|
+| `db_schema.sql` | CREATE TABLE statements | Fresh installation |
+| `migrate.sql` | ALTER TABLE statements | Upgrade dari v1.0 ke v2.0 |
+
 **Script akan:**
 - Tambah kolom baru (jika belum ada)
 - Set default value
 - Preserve existing data
-- Create gallery table
+- Gallery table sudah di-setup di db_schema.sql
 
 ---
 

@@ -1,5 +1,5 @@
 -- Migration script untuk upgrade table tb_court
--- Jalankan script ini untuk update struktur database
+-- Jalankan script ini untuk update struktur database pada existing installation
 
 -- Add new columns to tb_court if not exists
 ALTER TABLE tb_court MODIFY COLUMN name VARCHAR(100) NOT NULL;
@@ -18,12 +18,5 @@ ALTER TABLE tb_court ADD COLUMN updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP O
 -- Drop old price_per_hour column if it exists
 ALTER TABLE tb_court DROP COLUMN IF EXISTS price_per_hour;
 
--- Create gallery table
-CREATE TABLE IF NOT EXISTS tb_court_gallery (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    court_id INT NOT NULL,
-    image_url VARCHAR(255) NOT NULL,
-    image_order INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (court_id) REFERENCES tb_court(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+-- Note: tb_court_gallery table is created in fresh db_schema.sql
+-- If migrating from fresh schema, table already exists
