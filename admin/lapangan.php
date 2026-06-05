@@ -7,6 +7,7 @@ if (!isset($_SESSION['admin_id'])) {
 }
 
 require_once '../config/database.php';
+require_once 'includes/upload-handler.php';
 
 $page_title = 'Data Lapangan';
 $page_subtitle = 'Kelola data lapangan badminton';
@@ -15,6 +16,8 @@ $success = '';
 $error = '';
 $action = $_GET['action'] ?? '';
 $lapangan_id = $_GET['id'] ?? '';
+
+$upload_handler = new UploadHandler();
 
 // Handle Delete
 if ($action == 'delete' && $lapangan_id) {
@@ -46,12 +49,13 @@ if ($action == 'add' || $action == 'edit') {
         'parking' => '',
         'floor_type' => '',
         'facilities' => '',
-        'image_url' => ''
+        'image_url' => '',
+        'map_url' => ''
     ];
 
     if ($action == 'edit' && $lapangan_id) {
         try {
-            $stmt = $pdo->prepare('SELECT id, name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url FROM tb_court WHERE id = ?');
+            $stmt = $pdo->prepare('SELECT id, name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url, map_url FROM tb_court WHERE id = ?');
             $stmt->execute([$lapangan_id]);
             $lapangan = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
@@ -71,39 +75,91 @@ if ($action == 'add' || $action == 'edit') {
         $parking = trim($_POST['parking'] ?? '');
         $floor_type = trim($_POST['floor_type'] ?? '');
         $facilities = trim($_POST['facilities'] ?? '');
-        $image_url = trim($_POST['image_url'] ?? '');
+        $image_url = $lapangan['image_url'] ?? '';
+        $map_url = trim($_POST['map_url'] ?? '');
 
         if (empty($name) || empty($price_weekday) || empty($price_weekend)) {
             $error = 'Nama, harga weekday, dan harga weekend harus diisi!';
         } else {
-            try {
-                if ($action == 'add') {
-                    $stmt = $pdo->prepare('
-                        INSERT INTO tb_court 
-                        (name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                    ');
-                    $stmt->execute([
-                        $name, $location, $price_weekday, $price_weekend, $status, $description, 
-                        $size, $lighting, $parking, $floor_type, $facilities, $image_url
-                    ]);
-                    $success = 'Data lapangan berhasil ditambahkan!';
+            // Handle thumbnail upload
+            if (isset($_FILES['thumbnail']) && $_FILES['thumbnail']['error'] === UPLOAD_ERR_OK) {
+                $upload_result = $upload_handler->uploadFile($_FILES['thumbnail'], 'thumbnail');
+                if ($upload_result['success']) {
+                    $image_url = $upload_result['url'];
                 } else {
-                    $stmt = $pdo->prepare('
-                        UPDATE tb_court 
-                        SET name = ?, location = ?, price_weekday = ?, price_weekend = ?, status = ?, 
-                            description = ?, size = ?, lighting = ?, parking = ?, floor_type = ?, facilities = ?, image_url = ? 
-                        WHERE id = ?
-                    ');
-                    $stmt->execute([
-                        $name, $location, $price_weekday, $price_weekend, $status, $description, 
-                        $size, $lighting, $parking, $floor_type, $facilities, $image_url, $lapangan_id
-                    ]);
-                    $success = 'Data lapangan berhasil diupdate!';
+                    $error = $upload_result['message'];
                 }
-                $_POST = [];
-            } catch (PDOException $e) {
-                $error = 'Error: ' . $e->getMessage();
+            }
+
+            if (empty($error)) {
+                try {
+                    if ($action == 'add') {
+                        $stmt = $pdo->prepare('
+                            INSERT INTO tb_court 
+                            (name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url, map_url) 
+                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ');
+                        $result = $stmt->execute([
+                            $name, $location, $price_weekday, $price_weekend, $status, $description, 
+                            $size, $lighting, $parking, $floor_type, $facilities, $image_url, $map_url
+                        ]);
+                        
+                        if ($result) {
+                            $court_id = $pdo->lastInsertId();
+                            
+                            // Handle gallery upload
+                            if (isset($_FILES['gallery']) && !empty($_FILES['gallery']['name'][0])) {
+                                $gallery_results = $upload_handler->uploadMultiple($_FILES['gallery'], 'gallery');
+                                $order = 1;
+                                
+                                foreach ($gallery_results as $result) {
+                                    if ($result['success']) {
+                                        $stmt = $pdo->prepare('INSERT INTO tb_court_gallery (court_id, image_url, image_order) VALUES (?, ?, ?)');
+                                        $stmt->execute([$court_id, $result['url'], $order]);
+                                        $order++;
+                                    }
+                                }
+                            }
+                            
+                            $success = 'Data lapangan berhasil ditambahkan!';
+                        }
+                    } else {
+                        $stmt = $pdo->prepare('
+                            UPDATE tb_court 
+                            SET name = ?, location = ?, price_weekday = ?, price_weekend = ?, status = ?, 
+                                description = ?, size = ?, lighting = ?, parking = ?, floor_type = ?, facilities = ?, image_url = ?, map_url = ? 
+                            WHERE id = ?
+                        ');
+                        $stmt->execute([
+                            $name, $location, $price_weekday, $price_weekend, $status, $description, 
+                            $size, $lighting, $parking, $floor_type, $facilities, $image_url, $map_url, $lapangan_id
+                        ]);
+                        
+                        // Handle gallery upload untuk edit
+                        if (isset($_FILES['gallery']) && !empty($_FILES['gallery']['name'][0])) {
+                            $gallery_results = $upload_handler->uploadMultiple($_FILES['gallery'], 'gallery');
+                            
+                            // Get current max order
+                            $stmt = $pdo->prepare('SELECT MAX(image_order) as max_order FROM tb_court_gallery WHERE court_id = ?');
+                            $stmt->execute([$lapangan_id]);
+                            $result = $stmt->fetch();
+                            $order = ($result['max_order'] ?? 0) + 1;
+                            
+                            foreach ($gallery_results as $result) {
+                                if ($result['success']) {
+                                    $stmt = $pdo->prepare('INSERT INTO tb_court_gallery (court_id, image_url, image_order) VALUES (?, ?, ?)');
+                                    $stmt->execute([$lapangan_id, $result['url'], $order]);
+                                    $order++;
+                                }
+                            }
+                        }
+                        
+                        $success = 'Data lapangan berhasil diupdate!';
+                    }
+                    $_POST = [];
+                } catch (PDOException $e) {
+                    $error = 'Error: ' . $e->getMessage();
+                }
             }
         }
     }
@@ -112,7 +168,7 @@ if ($action == 'add' || $action == 'edit') {
     ?>
 
     <!-- Form Add/Edit -->
-    <div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-md p-8">
+    <div class="bg-white rounded-2xl shadow-md p-8">
         <h3 class="text-2xl font-bold text-slate-900 mb-6">
             <i class="fas fa-<?php echo $action == 'add' ? 'plus-circle' : 'edit'; ?> text-emerald-600 mr-2"></i>
             <?php echo $action == 'add' ? 'Tambah' : 'Edit'; ?> Lapangan
@@ -130,7 +186,7 @@ if ($action == 'add' || $action == 'edit') {
             </div>
         <?php endif; ?>
 
-        <form method="POST" action="">
+        <form method="POST" action="" enctype="multipart/form-data">
             <!-- Nama Lapangan -->
             <div class="mb-6">
                 <label class="block text-slate-700 font-semibold mb-2">Nama Lapangan <span class="text-rose-600">*</span></label>
@@ -157,7 +213,7 @@ if ($action == 'add' || $action == 'edit') {
             </div>
 
             <!-- Harga Weekday & Weekend -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block text-slate-700 font-semibold mb-2">Harga Weekday (Rp) <span class="text-rose-600">*</span></label>
                     <input 
@@ -210,8 +266,8 @@ if ($action == 'add' || $action == 'edit') {
                 ><?php echo htmlspecialchars($lapangan['description'] ?? $_POST['description'] ?? ''); ?></textarea>
             </div>
 
-            <!-- Grid Ukuran, Pencahayaan, Parkir, Tipe Lantai -->
-            <div class="grid grid-cols-2 gap-4 mb-6">
+            <!-- Ukuran & Pencahayaan -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block text-slate-700 font-semibold mb-2">Ukuran</label>
                     <input 
@@ -232,6 +288,10 @@ if ($action == 'add' || $action == 'edit') {
                         placeholder="LED Standard"
                     >
                 </div>
+            </div>
+
+            <!-- Parkir & Tipe Lantai -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                 <div>
                     <label class="block text-slate-700 font-semibold mb-2">Parkir</label>
                     <input 
@@ -266,30 +326,88 @@ if ($action == 'add' || $action == 'edit') {
                 <p class="text-slate-500 text-xs mt-1">Contoh: AC, Toilet, Kamar Ganti, Penyewaan Perlengkapan</p>
             </div>
 
-            <!-- URL Gambar Utama -->
-            <div class="mb-8">
-                <label class="block text-slate-700 font-semibold mb-2">URL Gambar Utama</label>
+            <!-- Map Link Input -->
+            <div class="mb-6 p-6 bg-blue-50 rounded-lg border border-blue-200">
+                <label class="block text-slate-700 font-semibold mb-3">
+                    <i class="fas fa-map-location-dot text-blue-600 mr-2"></i> Link Google Maps (Embed Code)
+                </label>
+                <p class="text-slate-600 text-sm mb-3">Salin embed code dari Google Maps untuk menampilkan lokasi lapangan</p>
+                
+                <textarea 
+                    name="map_url" 
+                    rows="4"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition font-mono text-xs"
+                    placeholder="Contoh: https://www.google.com/maps/embed?pb=1m18!1m12!1m3!1d..."
+                ><?php echo htmlspecialchars($lapangan['map_url'] ?? $_POST['map_url'] ?? ''); ?></textarea>
+                
+                <div class="mt-3 p-3 bg-white rounded border border-blue-200">
+                    <p class="text-slate-600 text-xs mb-2"><strong>Cara mendapatkan embed code:</strong></p>
+                    <ol class="text-slate-600 text-xs space-y-1 list-decimal list-inside">
+                        <li>Buka <a href="https://maps.google.com" target="_blank" class="text-blue-600 hover:underline">Google Maps</a></li>
+                        <li>Cari lokasi lapangan Anda</li>
+                        <li>Klik tombol "Share" (ikon bagikan)</li>
+                        <li>Pilih tab "Embed a map"</li>
+                        <li>Salin HTML code yang tersedia</li>
+                        <li>Paste ke kolom di atas</li>
+                    </ol>
+                </div>
+            </div>
+
+            <!-- Upload Thumbnail -->
+            <div class="mb-6 p-6 bg-slate-50 rounded-lg border-2 border-dashed border-slate-300">
+                <label class="block text-slate-700 font-semibold mb-3">
+                    <i class="fas fa-image text-emerald-600 mr-2"></i> Upload Thumbnail Lapangan
+                </label>
+                <p class="text-slate-600 text-sm mb-3">Foto utama yang akan ditampilkan di halaman utama</p>
+                
+                <?php if ($lapangan['image_url'] && $action == 'edit'): ?>
+                    <div class="mb-4 p-3 bg-white rounded-lg border border-slate-200">
+                        <p class="text-slate-600 text-sm mb-2">Foto saat ini:</p>
+                        <img src="<?php echo htmlspecialchars($lapangan['image_url']); ?>" alt="Thumbnail" class="h-32 w-auto rounded-lg">
+                    </div>
+                <?php endif; ?>
+                
                 <input 
-                    type="url" 
-                    name="image_url" 
-                    value="<?php echo htmlspecialchars($lapangan['image_url'] ?? $_POST['image_url'] ?? ''); ?>"
-                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-100 transition"
-                    placeholder="https://example.com/image.jpg"
+                    type="file" 
+                    name="thumbnail" 
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 transition cursor-pointer"
+                    id="thumbnailInput"
                 >
-                <p class="text-slate-500 text-xs mt-1">Gallery images dapat diupload di halaman terpisah (coming soon)</p>
+                <p class="text-slate-500 text-xs mt-2">Format: JPG, PNG, WebP, GIF | Max: 5MB</p>
+                <div id="thumbnailPreview" class="mt-3"></div>
+            </div>
+
+            <!-- Upload Gallery -->
+            <div class="mb-8 p-6 bg-slate-50 rounded-lg border-2 border-dashed border-slate-300">
+                <label class="block text-slate-700 font-semibold mb-3">
+                    <i class="fas fa-images text-emerald-600 mr-2"></i> Upload Galeri Foto (Multiple)
+                </label>
+                <p class="text-slate-600 text-sm mb-3">Upload lebih dari 1 foto untuk menampilkan galeri lapangan</p>
+                
+                <input 
+                    type="file" 
+                    name="gallery[]" 
+                    multiple
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:outline-none focus:border-emerald-600 transition cursor-pointer"
+                    id="galleryInput"
+                >
+                <p class="text-slate-500 text-xs mt-2">Format: JPG, PNG, WebP, GIF | Max: 5MB per file</p>
+                <div id="galleryPreview" class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3"></div>
             </div>
 
             <!-- Buttons -->
             <div class="flex gap-4">
                 <button 
                     type="submit" 
-                    class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg transition duration-300"
+                    class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-8 py-3 rounded-lg transition duration-300"
                 >
                     <i class="fas fa-save mr-2"></i> Simpan
                 </button>
                 <a 
                     href="lapangan.php" 
-                    class="flex-1 text-center bg-slate-300 hover:bg-slate-400 text-slate-900 font-bold py-3 rounded-lg transition duration-300"
+                    class="text-center bg-slate-300 hover:bg-slate-400 text-slate-900 font-bold px-8 py-3 rounded-lg transition duration-300"
                 >
                     <i class="fas fa-times mr-2"></i> Batal
                 </a>
@@ -297,11 +415,44 @@ if ($action == 'add' || $action == 'edit') {
         </form>
     </div>
 
+    <script>
+        // Thumbnail Preview
+        document.getElementById('thumbnailInput')?.addEventListener('change', function(e) {
+            const preview = document.getElementById('thumbnailPreview');
+            preview.innerHTML = '';
+            
+            if (this.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    preview.innerHTML = `<img src="${event.target.result}" alt="Preview" class="h-32 w-auto rounded-lg">`;
+                };
+                reader.readAsDataURL(this.files[0]);
+            }
+        });
+
+        // Gallery Preview
+        document.getElementById('galleryInput')?.addEventListener('change', function(e) {
+            const preview = document.getElementById('galleryPreview');
+            preview.innerHTML = '';
+            
+            Array.from(this.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const img = document.createElement('img');
+                    img.src = event.target.result;
+                    img.className = 'h-24 w-full object-cover rounded-lg';
+                    preview.appendChild(img);
+                };
+                reader.readAsDataURL(file);
+            });
+        });
+    </script>
+
     <?php include 'templates/footer.php';
 } else {
     // Display list of lapangan
     try {
-        $stmt = $pdo->query('SELECT id, name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url, created_at FROM tb_court ORDER BY created_at DESC');
+        $stmt = $pdo->query('SELECT id, name, location, price_weekday, price_weekend, status, description, size, lighting, parking, floor_type, facilities, image_url, map_url, created_at FROM tb_court ORDER BY created_at DESC');
         $lapangan_list = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (PDOException $e) {
         $error = 'Error: ' . $e->getMessage();

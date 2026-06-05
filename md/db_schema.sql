@@ -3,23 +3,6 @@
 CREATE DATABASE IF NOT EXISTS db_booking_lapangan_badminton;
 USE db_booking_lapangan_badminton;
 
--- Table: tb_admin
-CREATE TABLE IF NOT EXISTS tb_admin (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Table: tb_user (customers)
-CREATE TABLE IF NOT EXISTS tb_user (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    email VARCHAR(100) NOT NULL UNIQUE,
-    phone VARCHAR(20),
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- Table: tb_court (badminton courts)
 CREATE TABLE IF NOT EXISTS tb_court (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -35,6 +18,7 @@ CREATE TABLE IF NOT EXISTS tb_court (
     floor_type VARCHAR(100) DEFAULT 'Vinyl/PVC',
     facilities TEXT,
     image_url VARCHAR(255),
+    map_url TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -42,13 +26,14 @@ CREATE TABLE IF NOT EXISTS tb_court (
 -- Table: tb_booking (court reservations)
 CREATE TABLE IF NOT EXISTS tb_booking (
     id INT AUTO_INCREMENT PRIMARY KEY,
-    user_id INT NOT NULL,
+    customer_name VARCHAR(100) NOT NULL,
+    customer_email VARCHAR(100) NOT NULL,
+    customer_phone VARCHAR(20) NOT NULL,
     court_id INT NOT NULL,
     start_time DATETIME NOT NULL,
     end_time DATETIME NOT NULL,
     status ENUM('pending','confirmed','cancelled') DEFAULT 'pending',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES tb_user(id) ON DELETE CASCADE,
     FOREIGN KEY (court_id) REFERENCES tb_court(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -62,15 +47,6 @@ CREATE TABLE IF NOT EXISTS tb_court_gallery (
     FOREIGN KEY (court_id) REFERENCES tb_court(id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Table: tb_content (CMS pages controlled by admin)
-CREATE TABLE IF NOT EXISTS tb_content (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    page_slug VARCHAR(100) NOT NULL UNIQUE,
-    title VARCHAR(150) NOT NULL,
-    body TEXT NOT NULL,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- Table: tb_setting (site-wide settings, optional)
 CREATE TABLE IF NOT EXISTS tb_setting (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -82,7 +58,7 @@ CREATE TABLE IF NOT EXISTS tb_setting (
 -- End of schema
 
 -- ============================================================================
--- MIGRATION REFERENCE (For upgrading existing v1.0 database to v2.0)
+-- MIGRATION REFERENCE (For upgrading existing database)
 -- ============================================================================
 -- If you have existing data and need to update table structure, run these:
 -- 
@@ -96,7 +72,7 @@ CREATE TABLE IF NOT EXISTS tb_setting (
 -- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS parking VARCHAR(100) DEFAULT 'Tersedia' AFTER lighting;
 -- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS floor_type VARCHAR(100) DEFAULT 'Vinyl/PVC' AFTER parking;
 -- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS facilities TEXT AFTER floor_type;
--- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS status ENUM('tersedia', 'maintenance', 'booking') DEFAULT 'tersedia' AFTER facilities;
+-- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS map_url TEXT AFTER image_url;
 -- ALTER TABLE tb_court ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER created_at;
 -- ALTER TABLE tb_court DROP COLUMN IF EXISTS price_per_hour;
 --

@@ -1,10 +1,4 @@
 <?php
-/**
- * Booking Lapangan Badminton - Single File UI
- * All pages (home, booking, history, about) in one file
- * No folders, no includes - everything inline
- */
-
 // Database connection
 $host = 'localhost';
 $db = 'db_booking_lapangan_badminton';
@@ -97,26 +91,23 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex-shrink-0 flex items-center">
-                    <a href="?" class="text-2xl font-bold" style="color: var(--primary-color);">
+                    <a href="index.php" class="text-2xl font-bold" style="color: var(--primary-color);">
                         🏸 Booking Lapangan
                     </a>
                 </div>
 
                 <div class="hidden md:flex items-center space-x-8">
-                    <a href="?page=home" class="nav-link <?php echo ($current_page === 'home') ? 'active' : ''; ?>" style="color: <?php echo ($current_page === 'home') ? 'var(--primary-color)' : '#666'; ?>">
+                    <a href="index.php?page=home" class="nav-link <?php echo ($current_page === 'home') ? 'active' : ''; ?>" style="color: <?php echo ($current_page === 'home') ? 'var(--primary-color)' : '#666'; ?>">
                         Beranda
                     </a>
-                    <a href="?page=booking" class="nav-link <?php echo ($current_page === 'booking') ? 'active' : ''; ?>" style="color: <?php echo ($current_page === 'booking') ? 'var(--primary-color)' : '#666'; ?>">
+                    <a href="index.php?page=booking" class="nav-link <?php echo ($current_page === 'booking') ? 'active' : ''; ?>" style="color: <?php echo ($current_page === 'booking') ? 'var(--primary-color)' : '#666'; ?>">
                         Booking
                     </a>
-                    <a href="?page=history" class="nav-link <?php echo ($current_page === 'history') ? 'active' : ''; ?>" style="color: <?php echo ($current_page === 'history') ? 'var(--primary-color)' : '#666'; ?>">
+                    <a href="index.php?page=history" class="nav-link <?php echo ($current_page === 'history') ? 'active' : ''; ?>" style="color: <?php echo ($current_page === 'history') ? 'var(--primary-color)' : '#666'; ?>">
                         Riwayat
                     </a>
-                    <a href="?page=about" class="nav-link <?php echo ($current_page === 'about') ? 'active' : ''; ?>" style="color: <?php echo ($current_page === 'about') ? 'var(--primary-color)' : '#666'; ?>">
+                    <a href="index.php?page=about" class="nav-link <?php echo ($current_page === 'about') ? 'active' : ''; ?>" style="color: <?php echo ($current_page === 'about') ? 'var(--primary-color)' : '#666'; ?>">
                         Tentang
-                    </a>
-                    <a href="admin/login.php" class="cta-btn">
-                        Admin Login
                     </a>
                 </div>
 
@@ -130,11 +121,10 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
             </div>
 
             <div id="mobileMenu" class="hidden md:hidden pb-4">
-                <a href="?page=home" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Beranda</a>
-                <a href="?page=booking" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Booking</a>
-                <a href="?page=history" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Riwayat</a>
-                <a href="?page=about" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Tentang</a>
-                <a href="admin/login.php" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Admin Login</a>
+                <a href="index.php?page=home" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Beranda</a>
+                <a href="index.php?page=booking" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Booking</a>
+                <a href="index.php?page=history" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Riwayat</a>
+                <a href="index.php?page=about" class="block px-2 py-2 text-gray-700 hover:text-emerald-600">Tentang</a>
             </div>
         </div>
     </nav>
@@ -159,10 +149,10 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
                                 Temukan dan pesan lapangan badminton favorit Anda dengan mudah. Sistem transparan, harga terjangkau, dan pelayanan terbaik.
                             </p>
                             <div class="flex gap-4">
-                                <a href="?page=booking" class="cta-btn">
+                                <a href="index.php?page=booking" class="cta-btn">
                                     Mulai Booking Sekarang
                                 </a>
-                                <a href="?page=about" class="cta-btn" style="background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color);">
+                                <a href="index.php?page=about" class="cta-btn" style="background: transparent; border: 2px solid var(--accent-color); color: var(--accent-color);">
                                     Pelajari Lebih Lanjut
                                 </a>
                             </div>
@@ -285,7 +275,7 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
                                     </div>
                                 </div>
 
-                                <a href="?page=booking" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition text-center block">
+                                <a href="index.php?page=booking" class="w-full bg-emerald-600 text-white py-2 rounded-lg font-semibold hover:bg-emerald-700 transition text-center block">
                                     Booking Sekarang
                                 </a>
                             </div>
@@ -306,9 +296,115 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
                     </div>
 
                     <div class="text-center mt-12">
-                        <a href="?page=booking" class="cta-btn" style="background: var(--primary-color); color: white;">
+                        <a href="index.php?page=booking" class="cta-btn" style="background: var(--primary-color); color: white;">
                             Lihat Semua Lapangan →
                         </a>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TESTIMONIAL & REVIEW SECTION -->
+            <section class="py-20 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl font-bold mb-4">Apa Kata Pelanggan Kami?</h2>
+                        <p class="text-xl text-gray-600">Ribuan pelanggan puas telah merasakan kemudahan booking dengan kami</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <!-- Testimonial Card 1 -->
+                        <div class="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-8 hover:shadow-xl transition duration-300">
+                            <div class="flex items-center mb-4">
+                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-xl">
+                                    AH
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-bold">Ahmad Hidayat</h4>
+                                    <p class="text-gray-600 text-sm">Pelanggan Setia</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span class="text-yellow-400">★★★★★</span>
+                            </div>
+                            <p class="text-gray-700 italic mb-4">
+                                "Platform booking ini sangat memudahkan saya. Proses booking cepat dan harganya transparan. Saya sudah booking berkali-kali dan selalu puas dengan layanannya!"
+                            </p>
+                            <p class="text-gray-500 text-sm">Jakarta, 3 bulan lalu</p>
+                        </div>
+
+                        <!-- Testimonial Card 2 -->
+                        <div class="bg-gradient-to-br from-slate-50 to-yellow-50 rounded-xl p-8 hover:shadow-xl transition duration-300">
+                            <div class="flex items-center mb-4">
+                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-white font-bold text-xl">
+                                    SR
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-bold">Siti Rahmawati</h4>
+                                    <p class="text-gray-600 text-sm">Pemain Aktif</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span class="text-yellow-400">★★★★★</span>
+                            </div>
+                            <p class="text-gray-700 italic mb-4">
+                                "Lapangan yang ditawarkan berkualitas tinggi dengan harga yang kompetitif. Support teamnya juga sangat responsif jika ada pertanyaan. Highly recommended!"
+                            </p>
+                            <p class="text-gray-500 text-sm">Bandung, 2 bulan lalu</p>
+                        </div>
+
+                        <!-- Testimonial Card 3 -->
+                        <div class="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-8 hover:shadow-xl transition duration-300">
+                            <div class="flex items-center mb-4">
+                                <div class="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold text-xl">
+                                    BW
+                                </div>
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-bold">Budi Wijaya</h4>
+                                    <p class="text-gray-600 text-sm">Pelatih Badminton</p>
+                                </div>
+                            </div>
+                            <div class="flex mb-4">
+                                <span class="text-yellow-400">★★★★★</span>
+                            </div>
+                            <p class="text-gray-700 italic mb-4">
+                                "Sebagai pelatih, saya sangat menghargai sistem booking yang fleksibel dan mudah digunakan. Klien saya juga sangat senang dengan kemudahannya!"
+                            </p>
+                            <p class="text-gray-500 text-sm">Surabaya, 1 bulan lalu</p>
+                        </div>
+                    </div>
+
+                    <!-- Rating Summary -->
+                    <div class="mt-16 bg-gradient-to-r from-slate-900 via-emerald-900 to-slate-900 text-white rounded-xl p-8">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+                            <div>
+                                <div class="text-5xl font-bold mb-2" style="color: var(--accent-color);">4.8</div>
+                                <p class="text-lg">Rating Rata-rata</p>
+                                <p class="text-gray-400 text-sm">dari 1000+ review</p>
+                            </div>
+                            <div>
+                                <div class="text-5xl font-bold mb-2" style="color: var(--accent-color);">1000+</div>
+                                <p class="text-lg">Pengguna Puas</p>
+                                <p class="text-gray-400 text-sm">di seluruh Indonesia</p>
+                            </div>
+                            <div>
+                                <div class="text-5xl font-bold mb-2" style="color: var(--accent-color);">5000+</div>
+                                <p class="text-lg">Booking Berhasil</p>
+                                <p class="text-gray-400 text-sm">tanpa masalah</p>
+                            </div>
+                            <div>
+                                <div class="text-5xl font-bold mb-2" style="color: var(--accent-color);">24/7</div>
+                                <p class="text-lg">Support Team</p>
+                                <p class="text-gray-400 text-sm">siap membantu</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Call to Action Review -->
+                    <div class="mt-12 text-center">
+                        <p class="text-gray-600 mb-4">Sudah booking dengan kami? Bagikan pengalaman Anda!</p>
+                        <button class="bg-emerald-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">
+                            Tulis Review Anda
+                        </button>
                     </div>
                 </div>
             </section>
@@ -318,7 +414,7 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
                 <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
                     <h2 class="text-4xl font-bold mb-6">Siap Booking Lapangan?</h2>
                     <p class="text-xl mb-8" style="color: #d1f9e4;">Jangan tunda lagi! Pesan lapangan favorit Anda sekarang.</p>
-                    <a href="?page=booking" class="cta-btn text-lg font-bold px-8 py-4">
+                    <a href="index.php?page=booking" class="cta-btn text-lg font-bold px-8 py-4">
                         Booking Sekarang →
                     </a>
                 </div>
@@ -490,7 +586,7 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
                         <div class="text-gray-400 mb-4 text-5xl">📋</div>
                         <h3 class="text-2xl font-bold mb-2">Belum ada booking</h3>
                         <p class="text-gray-600 mb-6">Anda belum memiliki riwayat booking. Mulai booking lapangan sekarang!</p>
-                        <a href="?page=booking" class="inline-block bg-emerald-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">
+                        <a href="index.php?page=booking" class="inline-block bg-emerald-600 text-white px-8 py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">
                             Booking Lapangan Sekarang →
                         </a>
                     </div>
@@ -618,6 +714,143 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
                 </div>
             </section>
 
+            <!-- CONTACT US SECTION -->
+            <section class="py-20 bg-white">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-16">
+                        <h2 class="text-4xl font-bold mb-4">Hubungi Kami</h2>
+                        <p class="text-xl text-gray-600">Kami siap membantu Anda dengan pertanyaan atau masalah apapun</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                        <!-- Contact Card 1 -->
+                        <div class="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-8 hover:shadow-xl transition duration-300">
+                            <div class="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mb-6 mx-auto">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3 text-center">Telepon</h3>
+                            <p class="text-gray-700 text-center mb-2 font-semibold">+62 812-3456-7890</p>
+                            <p class="text-gray-600 text-center text-sm">Senin-Jumat, 08:00-17:00 WIB</p>
+                        </div>
+
+                        <!-- Contact Card 2 -->
+                        <div class="bg-gradient-to-br from-slate-50 to-yellow-50 rounded-xl p-8 hover:shadow-xl transition duration-300">
+                            <div class="w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto" style="background: var(--accent-color);">
+                                <svg class="w-8 h-8 text-slate-900" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3 text-center">Email</h3>
+                            <p class="text-gray-700 text-center mb-2 font-semibold">info@bookinglapangan.com</p>
+                            <p class="text-gray-600 text-center text-sm">Respon dalam 24 jam</p>
+                        </div>
+
+                        <!-- Contact Card 3 -->
+                        <div class="bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-8 hover:shadow-xl transition duration-300">
+                            <div class="w-16 h-16 bg-emerald-600 rounded-full flex items-center justify-center mb-6 mx-auto">
+                                <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3 text-center">Lokasi</h3>
+                            <p class="text-gray-700 text-center mb-2 font-semibold">Jl. Olahraga No. 123</p>
+                            <p class="text-gray-600 text-center text-sm">Jakarta Pusat, Indonesia</p>
+                        </div>
+                    </div>
+
+                    <!-- Contact Form -->
+                    <div class="max-w-3xl mx-auto bg-gradient-to-br from-slate-50 to-emerald-50 rounded-xl p-12">
+                        <h3 class="text-2xl font-bold mb-8 text-center">Kirim Pesan Kami</h3>
+                        <form class="space-y-6">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Nama Anda</label>
+                                    <input type="text" placeholder="John Doe" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 transition" required>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+                                    <input type="email" placeholder="john@example.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 transition" required>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Subjek</label>
+                                <input type="text" placeholder="Subjek pesan Anda" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 transition" required>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-2">Pesan</label>
+                                <textarea placeholder="Tulis pesan Anda di sini..." rows="5" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-600 transition resize-none" required></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-emerald-600 text-white py-3 rounded-lg font-semibold hover:bg-emerald-700 transition">
+                                Kirim Pesan
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+            <!-- MAP SECTION -->
+            <section class="py-20 bg-slate-50">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="text-center mb-12">
+                        <h2 class="text-4xl font-bold mb-4">Kunjungi Kami</h2>
+                        <p class="text-xl text-gray-600">Lokasi kantor pusat kami</p>
+                    </div>
+
+                    <!-- Map Container -->
+                    <div class="rounded-xl overflow-hidden shadow-2xl" style="height: 500px;">
+                        <iframe 
+                            width="100%" 
+                            height="100%" 
+                            frameborder="0" 
+                            style="border:0; border-radius: 12px;" 
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3966.3519071488826!2d106.81720931476919!3d-6.175392395532042!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e69f5c6b6b6b6b7%3A0x1234567890abcdef!2sJakarta%20Pusat!5e0!3m2!1sid!2sid!4v1234567890123" 
+                            allowfullscreen="" 
+                            loading="lazy" 
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+
+                    <!-- Map Info -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h3 class="text-lg font-bold mb-3 flex items-center">
+                                <span class="text-2xl mr-3">🕒</span> Jam Operasional
+                            </h3>
+                            <ul class="text-gray-700 text-sm space-y-2">
+                                <li><strong>Senin - Jumat:</strong> 08:00 - 17:00 WIB</li>
+                                <li><strong>Sabtu:</strong> 09:00 - 15:00 WIB</li>
+                                <li><strong>Minggu:</strong> Tutup</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h3 class="text-lg font-bold mb-3 flex items-center">
+                                <span class="text-2xl mr-3">🚗</span> Transportasi
+                            </h3>
+                            <ul class="text-gray-700 text-sm space-y-2">
+                                <li>✓ Dekat dengan stasiun MRT</li>
+                                <li>✓ Area parkir luas tersedia</li>
+                                <li>✓ Mudah diakses dengan kendaraan</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-white rounded-lg p-6 shadow-md">
+                            <h3 class="text-lg font-bold mb-3 flex items-center">
+                                <span class="text-2xl mr-3">🎒</span> Fasilitas
+                            </h3>
+                            <ul class="text-gray-700 text-sm space-y-2">
+                                <li>✓ Ruang tunggu ber-AC</li>
+                                <li>✓ Toilet bersih</li>
+                                <li>✓ WiFi gratis</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
         <?php endif; ?>
 
     </main>
@@ -634,10 +867,10 @@ $page_title = $titles[$current_page] ?? 'Booking Lapangan Badminton';
                 <div>
                     <h4 class="text-lg font-bold mb-4">Navigasi</h4>
                     <ul class="space-y-2 text-gray-400">
-                        <li><a href="?page=home" class="hover:text-yellow-400 transition">Beranda</a></li>
-                        <li><a href="?page=booking" class="hover:text-yellow-400 transition">Booking</a></li>
-                        <li><a href="?page=history" class="hover:text-yellow-400 transition">Riwayat</a></li>
-                        <li><a href="?page=about" class="hover:text-yellow-400 transition">Tentang Kami</a></li>
+                        <li><a href="index.php?page=home" class="hover:text-yellow-400 transition">Beranda</a></li>
+                        <li><a href="index.php?page=booking" class="hover:text-yellow-400 transition">Booking</a></li>
+                        <li><a href="index.php?page=history" class="hover:text-yellow-400 transition">Riwayat</a></li>
+                        <li><a href="index.php?page=about" class="hover:text-yellow-400 transition">Tentang Kami</a></li>
                     </ul>
                 </div>
 
